@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday - Nandara</title>
+    <style>
+        :root {
+            --lilac: #E0BBE4;
+            --pencil-yellow: #FFD93D;
+            --pencil-pink: #FF87B2;
+            --dark-text: #4A4A4A;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: hidden;
+            background-color: #000;
+        }
+
+        /* --- TELAS --- */
+        .screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: opacity 0.5s ease;
+        }
+
+        .screen.active { display: flex; opacity: 1; }
+
+        /* --- TELA INICIAL --- */
+        #video-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .title-hero {
+            z-index: 2;
+            font-size: 3rem;
+            color: white;
+            text-transform: uppercase;
+            text-shadow: 3px 3px 0px var(--pencil-pink);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        /* --- BOTÃO ESTILO LÁPIS --- */
+        .btn-rpg {
+            z-index: 2;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: var(--pencil-yellow);
+            border: 4px solid #000;
+            border-bottom: 8px solid #000;
+            cursor: pointer;
+            animation: pulse 1.5s infinite;
+            border-radius: 5px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* --- MENU INTERATIVO --- */
+        #menu-screen { background-color: var(--lilac); }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .menu-item img {
+            width: 80px; height: 80px;
+            object-fit: contain;
+            transition: transform 0.3s;
+        }
+
+        .menu-item:hover img { transform: translateY(-10px); }
+
+        /* --- POLAROID STYLE --- */
+        .polaroid {
+            background: white;
+            padding: 10px 10px 30px 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin: 10px;
+            transform: rotate(-2deg);
+        }
+
+        .polaroid img { width: 100%; max-height: 250px; object-fit: cover; }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        /* --- JOGO DE MEMÓRIA --- */
+        .memory-game {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            perspective: 1000px;
+        }
+
+        .memory-card {
+            width: 70px; height: 100px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+        }
+
+        .memory-card.flip { transform: rotateY(180deg); }
+
+        .front, .back {
+            position: absolute;
+            width: 100%; height: 100%;
+            backface-visibility: hidden;
+            border-radius: 5px;
+        }
+
+        .back { background: #B39DDB; border: 2px solid white; display: flex; align-items:center; justify-content:center;}
+        .back img { width: 80%; }
+        .front { transform: rotateY(180deg); background: white; }
+        .front img { width: 100%; height: 100%; object-fit: cover; border-radius: 5px; }
+
+        /* --- VOLTAR --- */
+        .back-btn {
+            margin-top: 20px;
+            background: #FFD93D;
+            padding: 10px 20px;
+            border: 2px solid #000;
+            font-weight: bold;
+        }
+
+        /* --- MODAL CARTA --- */
+        .modal {
+            background: white;
+            padding: 30px;
+            width: 85%;
+            border-radius: 10px;
+            text-align: center;
+            line-height: 1.6;
+        }
+        
+        /* --- VINIL --- */
+        .vinyl {
+            width: 150px; height: 150px;
+            border-radius: 50%;
+            background: #222;
+            border: 5px solid #444;
+            animation: spin 3s linear infinite;
+            animation-play-state: paused;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <section id="start-screen" class="screen active">
+        <video id="video-bg" autoplay muted loop playsinline>
+            <source src="v.mp4" type="video/mp4">
+        </video>
+        <h1 class="title-hero">HAPPY BIRTHDAY</h1>
+        <button class="btn-rpg" onclick="goToMenu()">START</button>
+    </section>
+
+    <section id="menu-screen" class="screen">
+        <div class="menu-grid">
+            <div class="menu-item" onclick="openGallery()">
+                <img src="galeria.png" alt="Galeria">
+                <span>Fotos</span>
+            </div>
+            <div class="menu-item" onclick="openMusic()">
+                <img src="musica.png" alt="Músicas">
+                <span>Playlist</span>
+            </div>
+            <div class="menu-item" onclick="openLetter()">
+                <img src="carta.png" alt="Carta">
+                <span>Mensagem</span>
+            </div>
+            <div class="menu-item" onclick="startEasterEgg()">
+                <img src="pergunta.png" alt="Segredo">
+                <span>?</span>
+            </div>
+            <div class="menu-item" onclick="startMemoryGame()" style="grid-column: span 2;">
+                <img src="jogo.png" alt="Jogo">
+                <span>Jogo de Memória</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="gallery-screen" class="screen" style="background: var(--lilac);">
+        <div class="gallery-grid" id="gallery-container"></div>
+        <button class="back-btn" onclick="goToMenu()">VOLTAR</button>
+    </section>
+
+    <section id="music-screen" class="screen" style="background: var(--lilac);">
+        <div class="vinyl" id="vinyl-disc"></div>
+        <h3 id="music-name" style="margin: 20px 0;">Barbie</h3>
+        <div style="display: flex; gap: 20px;">
+            <button class="btn-rpg" style="font-size: 1rem;" onclick="prevMusic()">⏮️</button>
+            <button class="btn-rpg" style="font-size: 1rem;" id="play-btn" onclick="toggleMusic()">▶️</button>
+            <button class="btn-rpg" style="font-size: 1rem;" onclick="nextMusic()">⏭️</button>
+        </div>
+        <button class="back-btn" onclick="goToMenu()">VOLTAR</button>
+    </section>
+
+    <section id="letter-screen" class="screen" style="background: rgba(0,0,0,0.5);">
+        <div class="modal">
+            <h2>Oi, Dr. Mestra Nandara!</h2><br>
+            <p>Quero te desejar um feliz aniversário e te desejar tudo de bom. Agradeço muito pela sua parceria em 2025, ela foi muito especial. Te desejo muitos anos de vida, cheios de felicidade, saúde, sucesso e conquistas. Aproveite muito o seu dia!</p>
+            <button class="back-btn" onclick="goToMenu()">FECHAR</button>
+        </div>
+    </section>
+
+    <section id="egg-screen" class="screen" style="background: white;">
+        <h1 id="countdown" style="font-size: 5rem;"></h1>
+        <div id="egg-result" style="display:none; text-align: center;">
+            <div class="polaroid"><img src="1.jpeg"></div>
+            <button class="back-btn" onclick="goToMenu()">VOLTAR AO MENU</button>
+        </div>
+    </section>
+
+    <section id="game-screen" class="screen" style="background: var(--lilac);">
+        <h2 id="game-msg" style="margin-bottom: 20px;">MEMORIZE EM...</h2>
+        <div class="memory-game" id="memory-board"></div>
+        <div id="win-screen" style="display: none; text-align: center; position: absolute; background: white; padding: 20px; border-radius: 10px; z-index: 100;">
+            <img src="vida.png" style="width: 100px;">
+            <h1 style="color: #FF87B2;">PARABÉNS!</h1>
+            <button class="back-btn" onclick="goToMenu()">VOLTAR AO MENU</button>
+        </div>
+    </section>
+
+    <audio id="audio-kk" src="kk.mp3"></audio>
+    <audio id="main-player"></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script>
+        // Navegação simples
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function goToMenu() { showScreen('menu-screen'); }
+
+        // 1. GALERIA
+        function openGallery() {
+            const container = document.getElementById('gallery-container');
+            container.innerHTML = '';
+            [2,3,4,5,6,7].forEach(num => {
+                container.innerHTML += `<div class="polaroid"><img src="${num}.jpeg"></div>`;
+            });
+            showScreen('gallery-screen');
+        }
+
+        // 2. MÚSICA
+        let currentTrack = 0;
+        const tracks = [
+            { name: 'Barbie', file: 'barbie.mp3' },
+            { name: 'Parabéns', file: 'parabens.mp3' },
+            { name: 'MPB', file: 'mpb.mp3' }
+        ];
+        const player = document.getElementById('main-player');
+        const vinyl = document.getElementById('vinyl-disc');
+
+        function openMusic() { showScreen('music-screen'); loadTrack(); }
+        
+        function loadTrack() {
+            player.src = tracks[currentTrack].file;
+            document.getElementById('music-name').innerText = tracks[currentTrack].name;
+        }
+
+        function toggleMusic() {
+            if (player.paused) {
+                player.play();
+                vinyl.style.animationPlayState = 'running';
+                document.getElementById('play-btn').innerText = '⏸️';
+            } else {
+                player.pause();
+                vinyl.style.animationPlayState = 'paused';
+                document.getElementById('play-btn').innerText = '▶️';
+            }
+        }
+
+        function nextMusic() { currentTrack = (currentTrack + 1) % tracks.length; loadTrack(); player.play(); }
+        function prevMusic() { currentTrack = (currentTrack - 1 + tracks.length) % tracks.length; loadTrack(); player.play(); }
+
+        // 3. CARTA
+        function openLetter() { showScreen('letter-screen'); }
+
+        // 4. EASTER EGG
+        function startEasterEgg() {
+            showScreen('egg-screen');
+            document.getElementById('audio-kk').play();
+            document.getElementById('egg-result').style.display = 'none';
+            let count = 4;
+            const timer = setInterval(() => {
+                document.getElementById('countdown').innerText = count;
+                count--;
+                if (count < 0) {
+                    clearInterval(timer);
+                    document.getElementById('countdown').innerText = '';
+                    document.getElementById('egg-result').style.display = 'block';
+                }
+            }, 1000);
+        }
+
+        // 5. JOGO DE MEMÓRIA
+        let cards = [];
+        let flippedCards = [];
+        let matchedCount = 0;
+
+        function startMemoryGame() {
+            showScreen('game-screen');
+            const board = document.getElementById('memory-board');
+            const msg = document.getElementById('game-msg');
+            board.innerHTML = '';
+            document.getElementById('win-screen').style.display = 'none';
+            
+            // Criar pares (1 a 8)
+            let cardValues = [1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8];
+            cardValues.sort(() => Math.random() - 0.5); // Embaralhar
+
+            cardValues.forEach(val => {
+                const card = document.createElement('div');
+                card.className = 'memory-card flip'; // Começa virada para cima
+                card.dataset.value = val;
+                card.innerHTML = `
+                    <div class="front"><img src="${val}.jpeg"></div>
+                    <div class="back"><img src="c.png"></div>
+                `;
+                board.appendChild(card);
+            });
+
+            // Lógica de memorização
+            let time = 5;
+            const interval = setInterval(() => {
+                msg.innerText = `MEMORIZE EM ${time}...`;
+                time--;
+                if(time < 0) {
+                    clearInterval(interval);
+                    msg.innerText = "VALENDO!";
+                    document.querySelectorAll('.memory-card').forEach(c => {
+                        c.classList.remove('flip');
+                        c.onclick = () => flipCard(c);
+                    });
+                }
+            }, 1000);
+        }
+
+        function flipCard(card) {
+            if (flippedCards.length < 2 && !card.classList.contains('flip')) {
+                card.classList.add('flip');
+                flippedCards.push(card);
+                
+                if (flippedCards.length === 2) {
+                    if (flippedCards[0].dataset.value === flippedCards[1].dataset.value) {
+                        matchedCount += 2;
+                        flippedCards = [];
+                        if (matchedCount === 16) {
+                            setTimeout(() => {
+                                document.getElementById('win-screen').style.display = 'block';
+                                confetti();
+                            }, 500);
+                        }
+                    } else {
+                        setTimeout(() => {
+                            flippedCards.forEach(c => c.classList.remove('flip'));
+                            flippedCards = [];
+                        }, 1000);
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
